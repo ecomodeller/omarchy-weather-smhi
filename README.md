@@ -73,3 +73,6 @@ Nothing happens to this plugin automatically, because it's a separate copy. Upst
 
 **Data and logo terms.**
 The forecast data is SMHI open data; see SMHI's terms on the [open data portal](https://opendata.smhi.se/). The SMHI wordmark is SMHI's own and is included only to credit SMHI as the data source.
+
+**How this was built.**
+With Claude Code, from ten prompts; see [`docs/prompts.md`](docs/prompts.md).
