@@ -1,4 +1,8 @@
-# SMHI weather for the Omarchy bar
+# SMHI weather for the Omarchy bar - An example of a tailormade widget made in 15 minutes
+
+> [!CAUTION]
+> This app was made with AI.
+> It might contain errors.
 
 **Hourly SMHI forecasts in the Omarchy weather panel: the next 12 hours of temperature and precipitation, one click from the bar.**
 
