@@ -70,4 +70,4 @@ _Avoid_: provider (see *Flagged ambiguities*)
 
 ### Open
 
-- **Data source vs provider.** The DHI family hasn't settled whether a data-publishing service is a *Provider* or a *Source* (see marine-observations' `GLOSSARY.md`). This repo says *data source* in prose and code (`dataSource`). Cost of switching later: one property and the README.
+- **Data source vs provider.** A data-publishing service could be called a *Provider* or a *Source*. This repo says *data source* in prose and code (`dataSource`). Cost of switching later: one property and the README.
