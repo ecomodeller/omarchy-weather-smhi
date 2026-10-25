@@ -8,7 +8,7 @@ import "Model.js" as Model
 Item {
   id: root
 
-  // [{time, temperature, precipitation, precipitationProbability, windSpeed, weatherCode, isDay}]
+  // [{time, temperature, precipitation, precipitationProbability, windSpeed, windGust, weatherCode, isDay}]
   property var hours: []
   property color foreground: Color.foreground
   property string fontFamily: ""
@@ -45,7 +45,7 @@ Item {
                  Math.round(h.temperature) + "°",
                  h.precipitation.toFixed(1) + " mm"]
     if (h.precipitationProbability !== undefined) parts.push(h.precipitationProbability + "%")
-    parts.push(Math.round(h.windSpeed * 3.6) + " km/h")
+    parts.push(Math.round(h.windSpeed) + (h.windGust !== undefined ? " (" + Math.round(h.windGust) + ")" : "") + " m/s")
     return parts.join("  ·  ")
   }
 

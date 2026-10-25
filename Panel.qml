@@ -140,18 +140,15 @@ Panel {
   readonly property var areaInfo: report && report.nearest_area && report.nearest_area[0] ? report.nearest_area[0] : null
   readonly property var forecastDays: buildForecastDays()
   readonly property var hourly: dailyForecastReport && dailyForecastReport.hourly ? dailyForecastReport.hourly : []
-  readonly property string reportCountry: areaInfo && areaInfo.country && areaInfo.country[0] ? areaInfo.country[0].value : ""
-
-  readonly property bool useImperial: Model.shouldUseImperial(setting("unit", ""), Qt.locale().name, reportCountry)
 
   // Auto-refresh interval in minutes; clamped to a sane minimum.
   readonly property int refreshMinutes: Math.max(1, parseInt(setting("refreshMinutes", 15), 10) || 15)
 
   readonly property string reportLocation:  configuredLocation || wttrLocation || (areaInfo && areaInfo.areaName && areaInfo.areaName[0] ? areaInfo.areaName[0].value : "")
-  readonly property string reportTempNum:   current ? String(useImperial ? current.temp_F : current.temp_C) : ""
-  readonly property string tempUnit:        "°" + (useImperial ? "F" : "C")
-  readonly property string reportFeels:     current ? formatTemp(useImperial ? current.FeelsLikeF : current.FeelsLikeC) : ""
-  readonly property string reportWind:      current ? (useImperial ? (current.windspeedMiles + " mph") : (current.windspeedKmph + " km/h")) : ""
+  readonly property string reportTempNum:   current ? String(current.temp_C) : ""
+  readonly property string reportFeels:     current ? formatTemp(current.FeelsLikeC) : ""
+  readonly property string reportWind:      current ? (windspeedMps(current) + " m/s") : ""
+  readonly property string reportGust:      current && current.windgustMps ? (current.windgustMps + " m/s") : ""
   readonly property string reportHumidity:  current ? (current.humidity + "%") : ""
 
   function refresh() {
@@ -301,12 +298,15 @@ Panel {
     return Model.roundedTemp(value)
   }
 
-  function celsiusToFahrenheit(value) {
-    return Model.celsiusToFahrenheit(value)
+  // wttr.in's current_condition carries km/h only.
+  function windspeedMps(condition) {
+    if (condition.windspeedMps !== undefined) return condition.windspeedMps
+    var kmph = parseFloat(String(condition.windspeedKmph))
+    return isNaN(kmph) ? "" : roundedTemp(kmph / 3.6)
   }
 
   function formatTemp(value) {
-    return Model.formatTemp(value, useImperial)
+    return Model.formatTemp(value)
   }
 
   function dayName(dateString) {
@@ -315,7 +315,7 @@ Panel {
 
   // Bare degree value (no unit letter), used in the forecast row.
   function bareTempForDay(day, kind) {
-    return Model.bareTempForDay(day, kind, useImperial)
+    return Model.bareTempForDay(day, kind)
   }
 
   // Representative icon for a forecast day: the hourly entry nearest noon.
@@ -566,7 +566,7 @@ Panel {
             }
             Text {
               textFormat: Text.PlainText
-              text: root.current ? root.tempUnit : ""
+              text: root.current ? "°C" : ""
               color: root.bar.foreground
               font.family: root.bar.fontFamily
               font.pixelSize: Style.font.display
@@ -715,6 +715,25 @@ Panel {
               Text {
                 textFormat: Text.PlainText
                 text: root.reportWind
+                color: root.bar.foreground
+                font.family: root.bar.fontFamily
+                font.pixelSize: Style.font.title
+              }
+            }
+
+            Column {
+              visible: root.reportGust !== ""
+              spacing: Style.space(5)
+              Text {
+                text: "GUSTS"
+                color: Qt.darker(root.bar.foreground, 1.5)
+                font.family: root.bar.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                font.letterSpacing: 1
+              }
+              Text {
+                textFormat: Text.PlainText
+                text: root.reportGust
                 color: root.bar.foreground
                 font.family: root.bar.fontFamily
                 font.pixelSize: Style.font.title

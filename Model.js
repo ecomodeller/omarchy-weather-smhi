@@ -80,46 +80,9 @@ function roundedTemp(value) {
   return isNaN(n) ? "" : String(Math.round(n))
 }
 
-function celsiusToFahrenheit(value) {
+function formatTemp(value) {
   if (value === undefined || value === null || value === "") return ""
-  var n = parseFloat(String(value))
-  return isNaN(n) ? "" : (n * 9 / 5) + 32
-}
-
-function formatTemp(value, useImperial) {
-  if (value === undefined || value === null || value === "") return ""
-  return value + "°" + (useImperial ? "F" : "C")
-}
-
-function normalizedUnit(value) {
-  return String(value || "").replace(/^\s+|\s+$/g, "").toLowerCase()
-}
-
-function localeUsesImperial(localeName) {
-  var name = String(localeName || "").replace(".", "_")
-  return /^en[_-]US($|[_.-])/.test(name) || /^en[_-]LR($|[_.-])/.test(name) || /^my($|[_.-])/.test(name)
-}
-
-function countryUsesImperial(countryName) {
-  var country = String(countryName || "")
-    .replace(/^\s+|\s+$/g, "")
-    .replace(/[._-]+/g, " ")
-    .toLowerCase()
-  if (!country) return null
-  if (country === "us" || country === "usa" || country === "united states" || country === "united states of america") return true
-  if (country === "liberia" || country === "myanmar" || country === "burma") return true
-  return false
-}
-
-function shouldUseImperial(unitOverride, localeName, countryName) {
-  var unit = normalizedUnit(unitOverride)
-  if (unit === "imperial") return true
-  if (unit === "metric") return false
-
-  var countryPreference = countryUsesImperial(countryName)
-  if (countryPreference !== null) return countryPreference
-
-  return localeUsesImperial(localeName)
+  return value + "°C"
 }
 
 function dayName(dateString, formatter) {
@@ -145,8 +108,6 @@ function openMeteoForecastDays(dailyForecastReport, todayString) {
       date: date,
       maxtempC: roundedTemp(maxC),
       mintempC: roundedTemp(minC),
-      maxtempF: roundedTemp(celsiusToFahrenheit(maxC)),
-      mintempF: roundedTemp(celsiusToFahrenheit(minC)),
       openMeteoWeatherCode: daily.weather_code ? daily.weather_code[i] : null
     })
   }
@@ -156,17 +117,16 @@ function openMeteoForecastDays(dailyForecastReport, todayString) {
 // Open-Meteo bundles current conditions with the daily forecast request and
 // answers far faster than wttr.in. Normalize them to wttr's
 // current_condition shape so the panel can use either source
-// interchangeably. Open-Meteo reports metric (°C, km/h).
+// interchangeably. Open-Meteo reports metric (°C, km/h); the panel shows wind in m/s.
 function openMeteoCurrentCondition(dailyForecastReport) {
   var current = dailyForecastReport && dailyForecastReport.current ? dailyForecastReport.current : null
   if (!current || current.temperature_2m === undefined || current.temperature_2m === null) return null
   return {
     temp_C: roundedTemp(current.temperature_2m),
-    temp_F: roundedTemp(celsiusToFahrenheit(current.temperature_2m)),
     FeelsLikeC: roundedTemp(current.apparent_temperature),
-    FeelsLikeF: roundedTemp(celsiusToFahrenheit(current.apparent_temperature)),
     windspeedKmph: roundedTemp(current.wind_speed_10m),
-    windspeedMiles: roundedTemp(current.wind_speed_10m * 0.621371),
+    windspeedMps: roundedTemp(current.wind_speed_10m / 3.6),
+    windgustMps: roundedTemp(current.wind_gusts_10m / 3.6),
     humidity: roundedTemp(current.relative_humidity_2m),
     openMeteoWeatherCode: current.weather_code,
     isDay: current.is_day
@@ -244,6 +204,7 @@ function smhiAsOpenMeteo(smhiReport, latitude, longitude, now) {
         precipitation: d.precipitation_amount_mean !== undefined ? d.precipitation_amount_mean : 0,
         precipitationProbability: d.probability_of_precipitation,
         windSpeed: d.wind_speed,
+        windGust: d.wind_speed_of_gust,
         weatherCode: smhiWeatherCode(d.symbol_code),
         isDay: solarElevation(time, latitude, longitude) > -0.833 ? 1 : 0
       })
@@ -277,6 +238,7 @@ function smhiAsOpenMeteo(smhiReport, latitude, longitude, now) {
       apparent_temperature: apparentTemperature(c.air_temperature, c.relative_humidity, c.wind_speed),
       relative_humidity_2m: c.relative_humidity,
       wind_speed_10m: c.wind_speed * 3.6,
+      wind_gusts_10m: c.wind_speed_of_gust * 3.6,
       weather_code: smhiWeatherCode(c.symbol_code),
       is_day: solarElevation(now, latitude, longitude) > -0.833 ? 1 : 0
     },
@@ -318,11 +280,9 @@ function buildForecastDays(report, dailyForecastReport, todayString) {
   return days.length > 0 ? days : wttrNextForecastDays(report, todayString)
 }
 
-function bareTempForDay(day, kind, useImperial) {
+function bareTempForDay(day, kind) {
   if (!day) return ""
-  var v = useImperial
-    ? (kind === "max" ? day.maxtempF : day.mintempF)
-    : (kind === "max" ? day.maxtempC : day.mintempC)
+  var v = kind === "max" ? day.maxtempC : day.mintempC
   if (v === undefined || v === null || v === "") return ""
   return v + "°"
 }
@@ -386,12 +346,7 @@ if (typeof module !== "undefined") {
     locationCommit: locationCommit,
     isFutureForecastDate: isFutureForecastDate,
     roundedTemp: roundedTemp,
-    celsiusToFahrenheit: celsiusToFahrenheit,
     formatTemp: formatTemp,
-    normalizedUnit: normalizedUnit,
-    localeUsesImperial: localeUsesImperial,
-    countryUsesImperial: countryUsesImperial,
-    shouldUseImperial: shouldUseImperial,
     dayName: dayName,
     openMeteoForecastDays: openMeteoForecastDays,
     openMeteoCurrentCondition: openMeteoCurrentCondition,

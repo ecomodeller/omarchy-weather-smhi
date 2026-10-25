@@ -6,7 +6,7 @@
 
 **Hourly SMHI forecasts in the Omarchy weather panel: the next 12 hours of temperature and precipitation, one click from the bar.**
 
-Hästveda, 18 October 2026. The Omarchy weather panel can now show forecasts from SMHI, the Swedish Meteorological and Hydrological Institute. The stock panel shows current conditions and three daily highs and lows from Open-Meteo or wttr.in. This plugin replaces both with SMHI's `snow1g` point forecast. It also adds charts for the next 12 hours: temperature as a line, precipitation as bars, and a condition icon every third hour. Hovering over the chart shows the time, temperature, precipitation amount and probability, and wind speed for that hour.
+Hästveda, 18 October 2026. The Omarchy weather panel can now show forecasts from SMHI, the Swedish Meteorological and Hydrological Institute. The stock panel shows current conditions and three daily highs and lows from Open-Meteo or wttr.in. This plugin replaces both with SMHI's `snow1g` point forecast. It also adds charts for the next 12 hours: temperature as a line, precipitation as bars, and a condition icon every third hour. Hovering over the chart shows the time, temperature, precipitation amount and probability, and wind speed with gusts for that hour.
 
 ![Weather panel with SMHI data: current conditions, 12-hour temperature and precipitation charts, 3-day forecast](docs/panel.png)
 
@@ -20,7 +20,7 @@ The stock panel can't answer "will it rain on the way home" or "how cold does it
 - **Next 12 hours.** 13 hourly points starting at the current hour. The temperature line labels only its high and low. Precipitation bars share the same time axis but have their own scale, with a 1 mm/h minimum so drizzle doesn't look like a downpour. When the 12 hours are dry, the chart says "No precipitation" instead of showing empty bars.
 - **Daily forecast.** The next three days' highs and lows, aggregated from the same timeseries in local time, with the condition icon taken from the step closest to 12:00.
 - **Attribution.** A small SMHI wordmark in the panel footer. It appears only after an SMHI forecast has loaded and switches between black and white versions to suit the theme.
-- **Humidity removed.** The panel now shows feels-like temperature and wind.
+- **Humidity removed.** The panel now shows feels-like temperature, wind and gusts.
 
 ## Getting started
 
@@ -61,7 +61,7 @@ Every 15 minutes by default. You can change this with the widget's `refreshMinut
 **What still calls services other than SMHI?**
 Two things.
 
-- **wttr.in:** the inherited code fetches `wttr.in` on every refresh. Once a location with coordinates is set, its current conditions are ignored. It is still used for IP-based location detection when no location is set, and for the country that picks metric or imperial units.
+- **wttr.in:** the inherited code fetches `wttr.in` on every refresh. Once a location with coordinates is set, its current conditions are ignored. It is still used for IP-based location detection when no location is set.
 - **Open-Meteo:** location search in the panel uses Open-Meteo's geocoding API, because SMHI has no place-name search.
 
 Removing both is open work.
